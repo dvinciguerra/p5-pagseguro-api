@@ -1,0 +1,41 @@
+=pod
+
+=encoding utf8
+
+=head2 Perl5 PagSeguro::API
+
+Implementação da documentação disponibilizada pelo PagSeguro para interagir com a
+api via web service utilizando perl 5.
+
+
+=head3 Status
+
+=over
+
+=item DONE
+
+- consulta de transações por código
+- consulta de transações por range de datas
+- consulta de transações abandonadas
+
+=item TODO
+
+- consulta notificações
+
+
+
+=head3 Author 
+
+2013 (c) Bivee L<http://bivee.com.br>
+
+Daniel Vinciguerra <daniel.vinciguerra at bivee.com.br>
+
+
+=head3 Copyright and License
+
+This software is copyright (c) 2013 by Bivee.
+
+This is a free software; you can redistribute it and/or modify it under the same terms of Perl 5 programming 
+languagem system itself.
+
+=cut
