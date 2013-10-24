@@ -1,12 +1,8 @@
-package PagSeguro::API;
+package PagSeguro::API::Transaction;
 
-use strict;
-use warnings;
-
-use PagSeguro::API::Transaction;
-use PagSeguro::API::Notification;
-
-our $VERSION = 1.0;
+use LWP::Simple;
+use XML::Simple;
+use PagSeguro::API::Resource;
 
 # constructor
 sub new {
@@ -17,10 +13,10 @@ sub new {
         _email => $args{email} || undef,
         _token => $args{token} || undef,
 
-        _transaction  => undef,
         _notification => undef,
     }, $class;
 }
+
 
 # accessors
 sub email {
@@ -33,48 +29,66 @@ sub token {
     return shift->{_token};
 }
 
+sub resource {
+    return PagSeguro::API::Resource->get($_[1]) if $_[1];
+}
+
 # methods
-sub transaction {
-    my $self = shift;
+sub load {
+    my ($self, $code) = @_;
 
-    # error
-    die "Exception: e-mail or token undef" 
-        unless $self->email && $self->token;
-
-    # manual instance
-    $self->{_transaction} = $_[0] 
-        if $_[0] && $_[0]->isa('PagSeguro::API::Transaction');
-
-
-    $self->{_transaction} = PagSeguro::API::Transaction->new(
-        email => $self->email, token => $self->token
-    ) unless $self->{_transaction};
-
-    return $self->{_transaction};
+    my $response = get $self->code_uri($code);
+    return XMLin($response);
 }
 
-sub notification {
+
+sub search {
     my $self = shift;
+    my %args = (@_ % 2) == 0? @_: undef;
 
-    # error
-    die "Exception: e-mail or token undef" 
-        unless $self->email && $self->token;
+    my $response = get $self->date_uri(
+        $args{initial}, $args{final}, $args{page}, $args{max}
+    );
 
-    # manual instance
-    $self->{_notification} = $_[0] 
-        if $_[0] && $_[0]->isa('PagSeguro::API::Notification');
-
-
-    $self->{_notification} = PagSeguro::API::Notification->new(
-        email => $self->email, token => $self->token
-    ) unless $self->{_notification};
-
-    return $self->{_notification};
+    return XMLin($response);
 }
 
+sub code_uri {
+    my ($self, $code) = @_;
+    
+    return join '', (
+        $self->resource('BASE_URI'),
+        $self->resource('TRANSACTION'),
+        $self->resource('NOTIFICATIONS'),
+        "${code}",
+        "?email=". $self->email,
+        "&token=". $self->token,
+    );
+}
+
+sub date_uri {
+    my ($self, $start, $end, $page, $max ) = @_;
+
+    # defaults
+    $page = 1 unless $page;
+    $max = 1000 unless $max;
+
+    return join '', (
+        $self->resource('BASE_URI'),
+        $self->resource('TRANSACTION'),
+        "?initialDate=${start}",
+        "&finalDate=${end}",
+        "&page=${page}",
+        "&maxPageResults=${max}",
+        "&email=". $self->email,
+        "&token=". $self->token,
+    );
+}
+
+
+sub DESTROY { }
 
 1;
-
 __END__
 
 =pod
@@ -89,7 +103,7 @@ PagSeguro::API - UOL PagSeguro Payment Gateway API Module
 
     # new instance
     my $ps = PagSeguro::API->new(
-        email=> 'foo@bar.com', token=>'95112EE828D94278BD394E91C4388F20'
+        email=> 'foo@bar.com', token=>'YOUR_SECURITY_TOKEN_HERE'
     );
 
 
@@ -97,16 +111,15 @@ PagSeguro::API - UOL PagSeguro Payment Gateway API Module
     my $transaction = $ps->transaction
         ->load('TRANSACTION_CODE_HERE');
 
+    my $transaction = $ps->transaction
+        ->search( 'TRANSACTION_CODE_HERE');
+
     # api xml response to perl hash
     say $transaction->{sender}->{name}; # Foo Bar
 
-    ...
 
-    my $notification = $ps->notification
-        ->load('NOTIFICATION_CODE_HERE');
 
-    # transaction code associated to this notification
-    say $notification->{code}; # 00000000-0000-0000-0000-000000000000 
+=head1 DESCRIPTION
 
 
 =head1 ACCESSORS
@@ -115,18 +128,21 @@ Public properties and their accessors
 
 =head3 email
     
-    # get or set email property
+    # getting setted email property
+    say $ps->email;
+
+    # setting an email
     $ps->email('foo@bar.com');
-    say $ps->email; 
 
 Email is a required properties to access HTTP GET based API urls.
 
-
 =head3 token
     
-    # get or set token property
-    $ps->token('95112EE828D94278BD394E91C4388F20');
+    # getting setted token property
     say $ps->token;
+
+    # setting a token
+    $ps->token('95112EE828D94278BD394E91C4388F20');
 
 Token is a required properties to access HTTP GET based API urls.
 

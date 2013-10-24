@@ -1,5 +1,6 @@
 package PagSeguro::API::Resource;
 
+# static methods
 sub get {
     my ($class, $code) = @_;
 
@@ -21,3 +22,4 @@ __DATA__
 BASE_URI=https://ws.pagseguro.uol.com.br
 TRANSACTION=/v2/transactions/
 ABANDONED=abandoned
+NOTIFICATIONS=notifications/
