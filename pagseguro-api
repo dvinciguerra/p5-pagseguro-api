@@ -7,23 +7,56 @@ use FindBin;
 use lib "$FindBin::Bin/lib";
 
 use App::Rad;
-use Data::Dumper;
 use PagSeguro::API;
 
 # show transactions
 sub transaction
-:Help("get the transaction:\n\t--email=you\@email.com\n\t--code=[transaction_code]\n\t--token=[account_token]"){
+:Help(qq{
+    \ttransaction by code:\n\t--email=you\@email.com --code=[transaction_code] --token=[account_token]\n
+    \ttransaction by date range:\n\t--email=you\@email.com --initial='2013-10-01T00:00' --final='2013-10-01T00:00' --token=[account_token]
+}){
     my $c = shift;
 
+    # api instance
     my $ps = PagSeguro::API->new(
         email => $c->options->{email}, token => $c->options->{token}
     );
 
+    # transaction by code
     if($c->options->{code}){
         my $code = $c->options->{code} || undef;
-        print Dumper $ps->transaction->load($code);
+        
+        my $res;
+        eval{
+            use Data::Dumper;
+            $res = Dumper $ps->transaction->load($code);
+        };
+        if($@){
+            print "Error: $@\n";
+            exit;
+        }
+    
+        print $res and exit;
+    }
 
-        return;
+    # transaction by date range
+    if($c->options->{initial} && $c->options->{final}){
+        my $initial = $c->options->{initial} || undef;
+        my $final = $c->options->{final} || undef;
+        
+        my $res;
+        eval{
+            use Data::Dumper;
+            $res = Dumper $ps->transaction->search(
+                initial => $initial, final => $final
+            );
+        };
+        if($@){
+            print "Error: $@\n";
+            exit;
+        }
+    
+        print $res and exit;
     }
 }
 
