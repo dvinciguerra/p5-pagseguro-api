@@ -1,12 +1,11 @@
 package PagSeguro::API;
-
 use strict;
 use warnings;
+our $VERSION = '0.001';
 
 use PagSeguro::API::Transaction;
-use PagSeguro::API::Notification;
+#use PagSeguro::API::Notification;
 
-our $VERSION = 1.0;
 
 # constructor
 sub new {
@@ -53,28 +52,7 @@ sub transaction {
     return $self->{_transaction};
 }
 
-sub notification {
-    my $self = shift;
-
-    # error
-    die "Exception: e-mail or token undef" 
-        unless $self->email && $self->token;
-
-    # manual instance
-    $self->{_notification} = $_[0] 
-        if $_[0] && $_[0]->isa('PagSeguro::API::Notification');
-
-
-    $self->{_notification} = PagSeguro::API::Notification->new(
-        email => $self->email, token => $self->token
-    ) unless $self->{_notification};
-
-    return $self->{_notification};
-}
-
-
 1;
-
 __END__
 
 =pod
@@ -159,26 +137,11 @@ methods for API.
 See more informations about at L<PagSeguro::API::Transaction>.
 
 
-=head3 notification
-
-    # getting notification class instance
-    my $t = $ps->notification;
-
-    # setting new notification instance
-    $ps->notification( PagSeguro::API::Notification->new );
-
-
-L<PagSeguro::API::Notification> is a class that will provide access to notification
-methods for API.
-
-See more informations about at L<PagSeguro::API::Notification>.
-
-
 =head1 AUTHOR
 
-2013 (c) Bivee L<http://bivee.com.br>
-
 Daniel Vinciguerra <daniel.vinciguerra@bivee.com.br>
+
+2013 (c) Bivee L<http://bivee.com.br>
 
 
 =head1 COPYRIGHT AND LICENSE
