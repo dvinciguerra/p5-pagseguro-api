@@ -1,15 +1,76 @@
-pod2text PagSeguro::API.pm > README
+NAME
+    PagSeguro::API - UOL PagSeguro Payment Gateway API Module
 
-If this is still here it means the programmer was too lazy to create the readme file.
+SYNOPSIS
+        use PagSeguro::API;
 
-You can create it now by using the command shown above from this directory.
+        # new instance
+        my $ps = PagSeguro::API->new(
+            email=> 'foo@bar.com', token=>'95112EE828D94278BD394E91C4388F20'
+        );
 
-At the very least you should be able to use this set of instructions
-to install the module...
 
-perl Makefile.PL
-make
-make test
-make install
+        # load transaction by code
+        my $transaction = $ps->transaction
+            ->load('TRANSACTION_CODE_HERE');
 
-If you are on a windows box you should use 'nmake' rather than 'make'.
+        # api xml response to perl hash
+        say $transaction->{sender}->{name}; # Foo Bar
+
+ACCESSORS
+    Public properties and their accessors
+
+   email
+        # get or set email property
+        $ps->email('foo@bar.com');
+        say $ps->email;
+
+    Email is a required properties to access HTTP GET based API urls.
+
+   token
+        # get or set token property
+        $ps->token('95112EE828D94278BD394E91C4388F20');
+        say $ps->token;
+
+    Token is a required properties to access HTTP GET based API urls.
+
+METHODS
+   new
+        my $ps = PagSeguro::API->new;
+
+    or pass paramethers...
+
+        my $ps = PagSeguro::API->new(
+            email => 'foo@bar.com', token => '95112EE828D94278BD394E91C4388F20'
+        );
+
+   transaction
+        # getting transaction class instance
+        my $t = $ps->transaction;
+
+        # setting new transaction instance
+        $ps->transaction( PagSeguro::API::Transaction->new );
+
+    PagSeguro::API::Transaction is a class that will provide access to
+    transaction methods for API.
+
+    See more informations about at PagSeguro::API::Transaction.
+
+BUG
+    Please, send bug reports to my CPAN user email at dvinci@cpan.org.
+
+    git-repository:
+
+    <https://github.com/dvinciguerra/p5-pagseguro-api>
+
+AUTHOR
+    Daniel Vinciguerra <daniel.vinciguerra@bivee.com.br>
+
+    2013 (c) Bivee <http://bivee.com.br>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2013 by Bivee.
+
+    This is a free software; you can redistribute it and/or modify it under
+    the same terms of Perl 5 programming languagem system itself.
+
