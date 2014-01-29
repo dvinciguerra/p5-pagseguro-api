@@ -3,14 +3,16 @@ use strict;
 use warnings;
 our $VERSION = '0.001';
 
+use PagSeguro::API::Resource;
 use PagSeguro::API::Transaction;
-#use PagSeguro::API::Notification;
-
 
 # constructor
 sub new {
     my $class = shift;
     my %args = @_ if (@_ % 2) == 0;
+
+    # start resource
+    PagSeguro::API::Resource->instance;
 
     return bless {
         _email => $args{email} || undef,

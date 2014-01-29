@@ -1,19 +1,29 @@
 package PagSeguro::API::Resource;
 
-# static methods
-sub get {
-    my ($class, $code) = @_;
+our $_instance;
 
-    while(<DATA>){
-        chomp $_;
+sub instance {
+    my $class = shift;
 
-        if($_ =~ /^$code/){
-            my ($key, $value) = split /=/, $_;
-            return $value if $value;
-        }
+    unless ($_instance){
+        my $self;
+
+        map{
+            chomp;
+            my ($k, $v) = split /=/, $_;
+            $self->{_res}->{$k} = $v;
+        } <DATA>;
+
+        $_instance = bless $self, $class;
     }
 
-    return undef;
+    return $_instance;
+}
+
+# static methods
+sub get {
+    my ($self, $code) = @_;
+    return $self->{_res}->{$code};
 }
 
 1;

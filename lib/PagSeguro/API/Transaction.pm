@@ -10,8 +10,8 @@ sub new {
     my %args = @_ if (@_ % 2) == 0;
 
     return bless {
-        _email => $args{email} || undef,
-        _token => $args{token} || undef,
+        email => $args{email} || undef,
+        token => $args{token} || undef,
 
         _transaction => undef,
     }, $class;
@@ -20,24 +20,37 @@ sub new {
 
 # accessors
 sub resource {
-    return (PagSeguro::API::Resource->get($_[1]) || undef) if $_[1];
+    my $res = PagSeguro::API::Resource->instance;
+    return ($res->get($_[1]) || undef) if $_[1];
 }
 
 # methods
 sub load {
-    my ($self, $code) = @_;
+    my $self = shift;
+    my %args = (@_ % 2) == 0? @_: undef;
 
-    my $response = get $self->_code_uri($code) || '';
+    # parse and return by file
+    return XMLin($args{file}) if $args{file};
+
+    my $response = get $self->_code_uri( $_[0] ) || '';
     return XMLin($response);
 }
 
 sub search {
-    my $self = shift;
-    my %args = (@_ % 2) == 0? @_: undef;
+    my ($self, %args) = @_;
+
+    # parse and return by file
+    return XMLin( $args{file} ) if defined $args{file};
 
     my $response = get $self->_date_uri(
         $args{initial}, $args{final}, $args{page}, $args{max}
     ) || '';
+
+    #print $response;
+    #print $self->_date_uri(
+    #    $args{initial}, $args{final}, $args{page}, $args{max}
+    #);
+    #exit;
 
     return XMLin($response);
 }
@@ -60,8 +73,8 @@ sub _code_uri {
         $self->resource('BASE_URI'),
         $self->resource('TRANSACTION'),
         "${code}",
-        "?email=". $self->email,
-        "&token=". $self->token,
+        "?email=". $self->{email},
+        "&token=". $self->{token},
     );
 }
 
@@ -79,8 +92,8 @@ sub _date_uri {
         "&finalDate=${end}",
         "&page=${page}",
         "&maxPageResults=${max}",
-        "&email=". $self->email,
-        "&token=". $self->token,
+        "&email=". $self->{email},
+        "&token=". $self->{token},
     );
 }
 
@@ -99,15 +112,12 @@ sub _abandoned_uri {
         "&finalDate=${end}",
         "&page=${page}",
         "&maxPageResults=${max}",
-        "&email=". $self->email,
-        "&token=". $self->token,
+        "&email=". $self->{email},
+        "&token=". $self->{token},
     );
 }
 
-sub DESTROY { }
-
 1;
-
 __END__
 
 =pod
