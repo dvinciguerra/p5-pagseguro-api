@@ -1,0 +1,10 @@
+MANIFEST
+README
+LICENSE
+Todo
+Changes
+Makefile.PL
+lib/PagSeguro/API.pm
+lib/PagSeguro/API/Transaction.pm
+lib/PagSeguro/API/Resource.pm
+t/basic.t

@@ -80,14 +80,6 @@ PagSeguro::API - UOL PagSeguro Payment Gateway API Module
     # api xml response to perl hash
     say $transaction->{sender}->{name}; # Foo Bar
 
-    ...
-
-    my $notification = $ps->notification
-        ->load('NOTIFICATION_CODE_HERE');
-
-    # transaction code associated to this notification
-    say $notification->{code}; # 00000000-0000-0000-0000-000000000000 
-
 
 =head1 ACCESSORS
 
@@ -137,6 +129,14 @@ L<PagSeguro::API::Transaction> is a class that will provide access to transactio
 methods for API.
 
 See more informations about at L<PagSeguro::API::Transaction>.
+
+=head1 BUG
+
+Please, send bug reports to my CPAN user email at dvinci@cpan.org.
+
+git-repository: 
+
+L<https://github.com/dvinciguerra/p5-pagseguro-api>
 
 
 =head1 AUTHOR
