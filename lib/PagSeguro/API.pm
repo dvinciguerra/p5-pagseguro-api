@@ -1,7 +1,7 @@
 package PagSeguro::API;
 use strict;
 use warnings;
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 use PagSeguro::API::Resource;
 use PagSeguro::API::Transaction;

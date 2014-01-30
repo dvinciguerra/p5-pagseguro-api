@@ -2,9 +2,6 @@
 
 use Test::More;
 
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-
 use PagSeguro::API;
 
 
@@ -33,7 +30,6 @@ is ref $range_xml, 'HASH', 'history test ok';
 # load abandoned
 my $abandon_xml = $t->abandoned(file => 't/xml/transaction-abandon.xml');
 is ref $abandon_xml, 'HASH', 'abandoned test ok';
-
 
 
 done_testing;
