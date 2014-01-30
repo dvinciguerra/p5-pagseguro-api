@@ -46,22 +46,18 @@ sub search {
         $args{initial}, $args{final}, $args{page}, $args{max}
     ) || '';
 
-    #print $response;
-    #print $self->_date_uri(
-    #    $args{initial}, $args{final}, $args{page}, $args{max}
-    #);
-    #exit;
-
     return XMLin($response);
 }
 
 sub abandoned {
-    my $self = shift;
-    my %args = (@_ % 2) == 0? @_: undef;
+    my ($self, %args) = @_;
+
+    # parse and return by file
+    return XMLin( $args{file} ) if defined $args{file};
 
     my $response = get $self->_abandoned_uri(
         $args{initial}, $args{final}, $args{page}, $args{max}
-    );
+    ) || '';
 
     return XMLin($response);
 }
