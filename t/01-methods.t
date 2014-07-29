@@ -16,6 +16,6 @@ subtest 'testing all methods exists' => sub {
 # accessors test    
 subtest 'testing accessors exists' => sub {
     can_ok 'PagSeguro::API', $_ for qw/email token/;
-}
+};
 
 done_testing;
