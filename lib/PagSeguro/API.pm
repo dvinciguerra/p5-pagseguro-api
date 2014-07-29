@@ -1,7 +1,7 @@
 package PagSeguro::API;
 use strict;
 use warnings;
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 use PagSeguro::API::Resource;
 use PagSeguro::API::Transaction;
@@ -14,10 +14,19 @@ sub new {
     # start resource
     PagSeguro::API::Resource->instance;
 
+    # check env vars
+    $args{email} = $ENV{PAGSEGURO_API_EMAIL} || undef
+        unless $args{email};
+
+    $args{token} = $ENV{PAGSEGURO_API_TOKEN} || undef
+        unless $args{token};
+
+
     return bless {
         _email => $args{email} || undef,
         _token => $args{token} || undef,
 
+        _checkout     => undef,
         _transaction  => undef,
         _notification => undef,
     }, $class;
