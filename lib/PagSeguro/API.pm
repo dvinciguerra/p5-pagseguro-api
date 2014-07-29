@@ -3,7 +3,7 @@ use strict;
 use warnings;
 our $VERSION = '0.003';
 
-use PagSeguro::API::Resource;
+use PagSeguro::API::Checkout;
 use PagSeguro::API::Transaction;
 
 # constructor
@@ -62,6 +62,26 @@ sub transaction {
 
     return $self->{_transaction};
 }
+
+sub checkout {
+    my $self = shift;
+
+    # error
+    die "Exception: e-mail or token undef" 
+        unless $self->email && $self->token;
+
+    # manual instance
+    $self->{_checkout} = $_[0] 
+        if $_[0] && $_[0]->isa('PagSeguro::API::Checkout');
+
+
+    $self->{_checkout} = PagSeguro::API::Checkout->new(
+        email => $self->email, token => $self->token
+    ) unless $self->{_checkout};
+
+    return $self->{_checkout};
+}
+
 
 1;
 __END__

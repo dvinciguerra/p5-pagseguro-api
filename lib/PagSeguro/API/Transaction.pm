@@ -1,8 +1,8 @@
 package PagSeguro::API::Transaction;
+use base 'PagSeguro::API::Base';
 
 use LWP::Simple;
 use XML::Simple;
-use PagSeguro::API::Resource;
 
 # constructor
 sub new {
@@ -18,11 +18,6 @@ sub new {
 }
 
 
-# accessors
-sub resource {
-    my $res = PagSeguro::API::Resource->instance;
-    return ($res->get($_[1]) || undef) if $_[1];
-}
 
 # methods
 sub load {

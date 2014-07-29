@@ -30,6 +30,8 @@ sub get {
 
 __DATA__
 BASE_URI=https://ws.pagseguro.uol.com.br
+SANDBOX_URI=https://ws.sandbox.pagseguro.uol.com.br
+CHECKOUT=/v2/checkout/
 TRANSACTION=/v2/transactions/
 ABANDONED=abandoned
 NOTIFICATIONS=notifications/
