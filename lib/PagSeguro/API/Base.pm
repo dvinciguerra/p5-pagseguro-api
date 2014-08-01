@@ -40,7 +40,8 @@ sub post {
     return $response->decoded_content 
         if $response && $response->is_success;
 
-    # FIXME throw error!?
+    # error
+    return $response->status_line;
 }
 
 

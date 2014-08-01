@@ -6,7 +6,10 @@ SYNOPSIS
 
         # new instance
         my $ps = PagSeguro::API->new(
-            email=> 'foo@bar.com', token=>'95112EE828D94278BD394E91C4388F20'
+            debug   => 1,                   # enable debug
+            sandbox => 1,                   # enable sandbox
+            email   => 'sandbox@bar.com', 
+            token   =>'95112EE828D94278BD394E91C4388F20'
         );
 
 
@@ -17,25 +20,70 @@ SYNOPSIS
         # api xml response to perl hash
         say $transaction->{sender}->{name}; # Foo Bar
 
+VARS
+    Enviroment variables that you can define to configure your access, debug
+    mode, sandbox use, etc...
+
+  email
+    Configure email to access api.
+
+        my $ps = PagSeguro::API->new( email => 'joe@doe.com' );
+
+    or you can use env var
+
+        $ENV{PAGSEGURO_API_EMAIL} = 'joe@doe.com';
+
+  token
+    Configure token to access api.
+
+        my $ps = PagSeguro::API->new( token => '95112EE828D94278BD394E91C4388F20' );
+
+    or you can use env var
+
+        $ENV{PAGSEGURO_API_TOKEN} = '95112EE828D94278BD394E91C4388F20';
+
+  sandbox
+    Configure module to use sandbox mode (default is 0).
+
+        my $ps = PagSeguro::API->new( sandbox => 1 );
+
+    or you can use env var
+
+        $ENV{PAGSEGURO_API_SANDBOX} = 1;
+
+  debug
+    Configure module to use debug mode (default is 0).
+
+        my $ps = PagSeguro::API->new( debug => 1 );
+
+    or you can use env var
+
+        $ENV{PAGSEGURO_API_DEBUG} = 1;
+
 ACCESSORS
     Public properties and their accessors
 
-   email
+  email
+    This is the user registered email that you need to use PagSeguro payment
+    API.
+
         # get or set email property
         $ps->email('foo@bar.com');
         say $ps->email;
 
-    Email is a required properties to access HTTP GET based API urls.
+    *email is a required properties to access HTTP GET based API urls.
 
-   token
+  token
+    This is a key that you need to use PagSeguro payment API.
+
         # get or set token property
         $ps->token('95112EE828D94278BD394E91C4388F20');
         say $ps->token;
 
-    Token is a required properties to access HTTP GET based API urls.
+    *token is a required properties to access HTTP GET based API urls.
 
 METHODS
-   new
+  new
         my $ps = PagSeguro::API->new;
 
     or pass paramethers...
@@ -44,17 +92,33 @@ METHODS
             email => 'foo@bar.com', token => '95112EE828D94278BD394E91C4388F20'
         );
 
-   transaction
+  checkout
+        # getting product checkout class instance
+        my $c = $ps->checkout;
+    
+        $ps->checkout( PagSeguro::API::Checkout->new );
+
+  transaction
         # getting transaction class instance
         my $t = $ps->transaction;
-
-        # setting new transaction instance
+    
         $ps->transaction( PagSeguro::API::Transaction->new );
 
     PagSeguro::API::Transaction is a class that will provide access to
     transaction methods for API.
 
     See more informations about at PagSeguro::API::Transaction.
+
+  notification
+        # getting notification class instance
+        my $n = $ps->notification;
+    
+        $ps->notification( PagSeguro::API::Notification->new );
+
+    PagSeguro::API::Notification is a class that will provide access to
+    notification methods for API.
+
+    See more informations about at PagSeguro::API::Notification.
 
 BUG
     Please, send bug reports to my CPAN user email at dvinci@cpan.org.

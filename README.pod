@@ -14,15 +14,19 @@ api via web service utilizando perl 5.
 
 =item DONE
 
-- consulta de transações por código
+    - checkout via api
 
-- consulta de transações por range de datas
+    - url de pagamento
 
-- consulta de transações abandonadas
+    - consulta de transações por código
+
+    - consulta de transações por range de datas
+
+    - consulta de transações abandonadas
 
 =item TODO
 
-- consulta notificações
+    - consulta notificações
 
 =back
 

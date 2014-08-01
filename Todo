@@ -1,5 +1,16 @@
 TODO list for Perl module PagSeguro::API
 
-- Notification API functionalities
-- Payment API functionalities
+  - response functionalities (after payment)
+  - become a test of API better
+  - change to make a better API
 
+
+DONE
+
+At version 0.003
+  - payment API functionalities
+  - test improvements
+  - class improvements
+
+At version 0.004
+  - notification API functionalities
