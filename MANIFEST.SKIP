@@ -1,4 +1,0 @@
-~$     # ignore emacs and vim backup files
-.bak$  # ignore manual backups
-\#     # ignore CVS old revision files and emacs temp files
-.git   # ignore git files

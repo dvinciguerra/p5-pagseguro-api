@@ -1,247 +1,128 @@
 package PagSeguro::API::Transaction;
-use base 'PagSeguro::API::Base';
+use Moo;
 
-use LWP::Simple;
-use XML::Simple;
+extends 'PagSeguro::API::Base';
 
-# constructor
-sub new {
-    my $class = shift;
-    my %args = @_ if (@_ % 2) == 0;
+use Carp;
+use PagSeguro::API::Util;
+use PagSeguro::API::Request;
 
-    return bless {
-        email => $args{email} || undef,
-        token => $args{token} || undef,
+# attributes
+has code => (is => 'rw');
 
-        _transaction => undef,
-    }, $class;
-}
+sub by_code {
+    my ($self, $code) = (shift, shift);
+    my $args = (@_ % 2 == 0)? {@_} : undef;
 
+    croak "error: code cannot be null!" unless $code;
 
+    my $email = $self->email;
+    my $token = $self->token;
 
-# methods
-sub load {
-    my $self = shift;
-    my %args = (@_ % 2) == 0? @_: undef;
-
-    # parse and return by file
-    return XMLin($args{file}) if $args{file};
-
-    my $response = get $self->_code_uri( $_[0] ) || '';
-    return XMLin($response);
-}
-
-sub search {
-    my ($self, %args) = @_;
-
-    # parse and return by file
-    return XMLin( $args{file} ) if defined $args{file};
-
-    my $response = get $self->_date_uri(
-        $args{initial}, $args{final}, $args{page}, $args{max}
-    ) || '';
-
-    return XMLin($response);
-}
-
-sub abandoned {
-    my ($self, %args) = @_;
-
-    # parse and return by file
-    return XMLin( $args{file} ) if defined $args{file};
-
-    my $response = get $self->_abandoned_uri(
-        $args{initial}, $args{final}, $args{page}, $args{max}
-    ) || '';
-
-    return XMLin($response);
-}
-
-sub _code_uri {
-    my ($self, $code) = @_;
+    my $req = PagSeguro::API::Request->new;
+    my $uri = $self->api_uri . "/transactions/${code}?email=${email}&token=${token}";
     
-    return join '', (
-        $self->resource('BASE_URI'),
-        $self->resource('TRANSACTION'),
-        "${code}",
-        "?email=". $self->{email},
-        "&token=". $self->{token},
-    );
+    # is notification
+    $uri = $self->api_uri . "/transactions/notifications/${code}?email=${email}&token=${token}"
+        if $args->{notification};
+
+    # api response
+    my $res = $req->get(url => $uri);
+
+    if($res && !$res->error){
+        my $result = $self->_parse_transaction($res->data);
+        $res->data($result);
+    }
+    
+    return $res;
 }
 
-sub _date_uri {
-    my ($self, $start, $end, $page, $max ) = @_;
-
-    # defaults
-    $page = 1 unless $page;
-    $max = 1000 unless $max;
-
-    return join '', (
-        $self->resource('BASE_URI'),
-        $self->resource('TRANSACTION'),
-        "?initialDate=${start}",
-        "&finalDate=${end}",
-        "&page=${page}",
-        "&maxPageResults=${max}",
-        "&email=". $self->{email},
-        "&token=". $self->{token},
-    );
+sub by_notification_code {
+    my ($self, $code) = (shift, shift);
+    return $self->by_code($code, notification => 1);
 }
 
-sub _abandoned_uri {
-    my ($self, $start, $end, $page, $max ) = @_;
+sub _parse_transaction {
+    my $self = shift;
+    
+    # read xml
+    my $xml = $self->xml($_[0]) if $_[0];
+    
+    my $data = {
+        date   => eval { $xml->find('/transaction/date')->string_value },
+        code   => eval { $xml->find('/transaction/code')->string_value },
+        type   => eval { $xml->find('/transaction/type')->string_value },
+        status => eval { $xml->find('/transaction/status')->string_value },
+        reference       => eval { $xml->find('/transaction/reference')->string_value },
+        lastEventDate   => eval { $xml->find('/transaction/lastEventDate')->string_value }, 
+        grossAmount     => eval { $xml->find('/transaction/grossAmount')->string_value },
+        paymentMethod => {
+            type => eval { $xml->find('/transaction/paymentMethod/type')->string_value },
+            code => eval { $xml->find('/transaction/paymentMethod/code')->string_value },
+        },
+        sender  => {
+            name    => eval { $xml->find('/transaction/sender/name')->string_value },
+            email   => eval { $xml->find('/transaction/sender/email')->string_value },
+            phone   => {
+                areaCode    =>  eval { $xml->find('/transaction/sender/phone/areaCode')->string_value },
+                number      => eval { $xml->find('/transaction/sender/phone/number')->string_value },
+            }
+        },
+        items   => []
+    };
 
-    # defaults
-    $page = 1 unless $page;
-    $max = 1000 unless $max;
+    for my $i ($xml->findnodes('//items/item')){
+        my $item = {
+            id          => eval { $i->find('./id')->string_value },
+            description => eval { $i->find('./description')->string_value },
+            quantity    => eval { $i->find('./quantity')->string_value },
+            amount      => eval { $i->find('./amount')->string_value },
+        };
 
-    return join '', (
-        $self->resource('BASE_URI'),
-        $self->resource('TRANSACTION'),
-        $self->resource('ABANDONED'),
-        "?initialDate=${start}",
-        "&finalDate=${end}",
-        "&page=${page}",
-        "&maxPageResults=${max}",
-        "&email=". $self->{email},
-        "&token=". $self->{token},
-    );
+        push @{$data->{items}}, $item;
+    }
+
+    return $data;
 }
 
 1;
 __END__
 
-=pod
+=encoding utf8
 
 =head1 NAME
 
-PagSeguro::API::Transaction - Transaction Class for PagSeguro::API module
+PagSeguro::API::Transaction - PagSeguro API transaction class
 
 =head1 SYNOPSIS
 
     use PagSeguro::API;
 
     # new instance
-    my $ps = PagSeguro::API->new(
-        email=> 'foo@bar.com', token=>'95112EE828D94278BD394E91C4388F20'
-    );
-
-
-    # transaction obj
-    my $t = $ps->transaction;
-
-    # load transaction by code
-    my $transaction = $t->load('766B9C-AD4B044B04DA-77742F5FA653-E1AB24');
+    my $p = PagSeguro::API->new;
     
-    # search transaction by date range
-    my $list = $t->search(
-        initial => '2013-10-01T00:00',
-        final   => '2013-10-30T00:00',
-        page    => 1,
-        max     => 1000,
-    );
+    #configure
+    $p->email('foo@bar.com');
+    $p->token('95112EE828D94278BD394E91C4388F20');
 
-    # search abandoned transaction by date range
-    my $list = $t->abandoned(
-        initial => '2013-10-01T00:00',
-        final   => '2013-10-30T00:00',
-        page    => 1,
-        max     => 1000,
-    );
+    # new transaction
+    my $transaction = $p->transaction;
+    my $response = $transaction->by_code('TRANSACTION_CODE');
 
-    # transaction returns perl hash
-    say $transaction->{code}; # 00000000-0000-0000-0000-000000000000
+    # or find by notification code
+    $response = $transaction->by_notification_code('NOTIFICATION_CODE');
 
+    # error
+    die "Error: ". $response->error if $response->error;
+    
+    say $response->data;
 
 =head1 DESCRIPTION
 
-L<PagSeguro::API::Transaction> is a class that provide access to transaction
-api search methods.
-
-
-=head1 ACCESSORS
-
-Public properties and their accessors
-
-=head3 resource
-    
-    my $t = $ps->transaction;
-    say $t->resource('BASE_URI');
-
-L<PagSeguro::API::Resource> is a container that store all connectoin url
-parts and some other things;
-
-
-=head1 METHODS
-
-=head3 new
-
-    # new instance
-    my $ps = PagSeguro::API::Transaction->new(
-        email => 'foo@bar.com', token => '95112EE828D94278BD394E91C4388F20'
-    );
-
-
-=head3 load
-
-    # getting transaction class instance
-    my $t = $ps->transaction;
-
-    # load transaction by code
-    my $transaction = $t->load('00000000-0000-0000-0000-000000000000');
-
-    say $transaction->{code};
-
-This method will load a transaction by code and returns a perl hash as
-success result or C<undef> as error or not found;
-
-
-=head3 search
-
-    # getting transaction class instance
-    my $t = $ps->transaction;
-
-    # load transaction by date range
-    my $list = $t->search(
-        initial => '2013-10-01T00:00', 
-        final   => '2013-10-30T00:00', 
-        page    => 1, 
-        max     => 10000
-    );
-
-This method will get a list of transactions by date range and returns a 
-perl hash as success result or C<undef> as error or not found;
-
-
-=head3 abandoned
-
-    # getting transaction class instance
-    my $t = $ps->transaction;
-
-    # load abandoned transaction by date range
-    my $list = $t->abandoned(
-        initial => '2013-10-01T00:00', 
-        final   => '2013-10-30T00:00', 
-        page    => 1, 
-        max     => 10000
-    );
-
-This method will get a list of abandoned transactions by date range and 
-returns a perl hash as success result or C<undef> as error or not found;
-
+PagSeguro API implementation for transaction data.
 
 =head1 AUTHOR
 
-2013 (c) Bivee L<http://bivee.com.br>
-
-Daniel Vinciguerra <daniel.vinciguerra@bivee.com.br>
+Daniel Vinciguerra <daniel.vinciguerra at bivee.com.br>
 
 
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2013 by Bivee.
-
-This is a free software; you can redistribute it and/or modify it under the same terms of Perl 5 programming 
-languagem system itself.
-
-=cut

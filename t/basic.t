@@ -1,48 +1,44 @@
-#!perl -w
 use strict;
 
 use Test::More;
 
-use FindBin;
-use lib "$FindBin::Bin/../lib";
-
 use PagSeguro::API;
 
-subtest 'testing object instantiate error' => sub {
-    my $ps_api = PagSeguro::API->new;
-
-    my ($email, $token) = ($ps_api->email, $ps_api->token);
-
-    ok(!$email && !$token);
-    is($email, undef);
-    is($token, undef);
+subtest 'pagseguro instance' => sub {
+    my $p = PagSeguro::API->new;
+    isa_ok $p, 'PagSeguro::API';
 };
 
 
-subtest 'testing object instantiate args' => sub {
-    my $ps_api = PagSeguro::API->new(
-        email => 'foo@bar.com',
-        token => '1E4C2E4E08374D5E81DCE87548282656',
+subtest 'pagseguro constructor' => sub {
+    my $p = PagSeguro::API->new(
+        email => 'foo', token => 'bar'
     );
-
-    my ($email, $token) = ($ps_api->email, $ps_api->token);
-
-    ok($email && $token);
-    is($email, 'foo@bar.com');
-    is($token, '1E4C2E4E08374D5E81DCE87548282656');
+    
+    is $p->email, 'foo';
+    is $p->token, 'bar';
 };
 
 
-subtest 'testing object instantiate env' => sub {
-    $ENV{PAGSEGURO_API_EMAIL} = 'foo@bar.com';
-    $ENV{PAGSEGURO_API_TOKEN} = '1E4C2E4E08374D5E81DCE87548282656';
+subtest 'pagseguro accessors' => sub {
+    my $p = PagSeguro::API->new;
+    $p->email('foo');
+    $p->token('bar');
 
-    my $ps_api = PagSeguro::API->new;
-    my ($email, $token) = ($ps_api->email, $ps_api->token);
+    is $p->email, 'foo';
+    is $p->token, 'bar';
 
-    ok($email && $token);
-    is($email, 'foo@bar.com');
-    is($token, '1E4C2E4E08374D5E81DCE87548282656');
+    # default values
+    is $p->environment, 'production';
+    is $p->debug, 0;
+
+    # custom values
+    $p->environment('sandox');
+    $p->debug(1);
+
+    is $p->environment, 'sandox';
+    is $p->debug, 1;
 };
+
 
 done_testing;
