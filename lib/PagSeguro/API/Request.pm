@@ -6,7 +6,7 @@ use LWP::UserAgent;
 use PagSeguro::API::Response;
 
 # attributes
-has ua => (is => 'rw', default => sub { LWP::UserAgent->new });
+has ua    => (is => 'rw', default => sub { LWP::UserAgent->new });
 has param => (is => 'rw', default => sub { {} });
 
 
@@ -18,7 +18,7 @@ sub get {
     # error (required)
     croak "url cannot be undefined" unless $args->{url};
 
-    my $ua = $self->ua;
+    my $ua  = $self->ua;
     my $res = $ua->get($args->{url});
     return $self->_parse_response($res);
 }

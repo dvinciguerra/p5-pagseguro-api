@@ -1,14 +1,65 @@
-=pod
-
 =encoding utf8
 
-=head2 Perl5 PagSeguro::API
+=head1 NAME
 
-Implementação da documentação disponibilizada pelo PagSeguro para interagir com a
-api via web service utilizando perl 5.
+PagSeguro::API - I<PagSeguro> Payment Gateway Module
+
+=head1 SYNOPSIS
+
+    use PagSeguro::API;
+    my $p = PagSeguro::API->new;
+
+
+    # configure api authentication
+    $p->email('foo@bar.com');
+    $p->token('95112EE828D94278BD394E91C4388F20');
+
+
+    # create a new payment
+    my $payment = $p->payment_request;
+    $payment->reference('PRODUCT_ID:XXX');
+    $payment->notification_url('http://google.com');
+    $payment->redirect_url('http://url_of_love.com.br');
+
+
+    $payment->add_item(
+        id          => $product->id,
+        description => $product->title,
+        amount      => $product->price,
+        weight      => $product->weight
+    );
+
+    # request payment checkout
+    my $response = $payment->request;
+
+    # error
+    die "Error: ". $response->error if $response->error;
+   
+
+=head1 DESCRIPTION
+
+PagSeguro API module implementation.
+
+This module provide a way to communicate with PagSeguro payment gateway as easy 
+as possible.
+
+Because PagSeguro is a brazilian company that provide this payment gaeway, I 
+will write this docs in portuguese.
+
+If you need some help to use it, please, send me an e-mail with details of what
+you need help.
+
+B<< Agora Em Portugues >>
+
+Modulo de implementação da API do I<PagSeguro>.
+
+Este modulo provê uma forma de comunicar-se com o sistema de pagamento I<PagSeguro>
+de forma simples.
 
 
 =head3 Status
+
+Alguns dados sobre o andamento do projeto:
 
 =over
 
@@ -28,21 +79,18 @@ api via web service utilizando perl 5.
 
     - consulta notificações
 
+    - pagamento por formulário
+
+    - checkout transparente
+
 =back
 
+=head1 AUTHOR
 
-=head3 Author 
+Daniel Vinciguerra <daniel.vinciguerra at bivee.com.br>
 
-2013 (c) Bivee L<http://bivee.com.br>
+2013-2015 E<copy> Bivee - L<http://bivee.com.br>
 
-Daniel Vinciguerra <daniel.vinciguerra@bivee.com.br>
+It is free software; you can redistribute it and/or modify it under the same 
+terms of perl license.
 
-
-=head3 Copyright and License
-
-This software is copyright (c) 2013 by Bivee.
-
-This is a free software; you can redistribute it and/or modify it under the same terms of Perl 5 programming 
-languagem system itself.
-
-=cut
